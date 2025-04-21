@@ -18,7 +18,11 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='posts/', null=True, blank=True)
     group = models.ForeignKey(
-        Group, on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
+        Group, on_delete=models.CASCADE,
+        related_name='posts',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.text
@@ -38,7 +42,11 @@ class Follow(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='follows')
     following = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='followings', null=True, blank=True
+        User,
+        on_delete=models.CASCADE,
+        related_name='followings',
+        null=True,
+        blank=True
     )
 
     class Meta:

@@ -1,14 +1,17 @@
 # TODO:  Напишите свой вариант
-from .serializers import PostSerializer, CommentSerializer, GroupSerializer
+from .serializers import PostSerializer, CommentSerializer, GroupSerializer, FollowSerializer
 from rest_framework import viewsets
-from posts.models import Post, Comment, Group
+from posts.models import Post, Comment, Group, Follow
 from .permissions import OwnerOrReadOnly
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework import filters
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (OwnerOrReadOnly, )
+    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -16,7 +19,6 @@ class PostViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    pagination_class = None
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -31,5 +33,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, post_id=self.get_post().id)
+
+class FollowViewSet(viewsets.ModelViewSet):
+    serializer_class = FollowSerializer
+    http_method_names = ['get', 'post']
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('following',)
+
+    def get_queryset(self):
+        return Follow.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     

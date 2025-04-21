@@ -39,9 +39,9 @@ class FollowSerializer(serializers.ModelSerializer):
         slug_field='username', queryset=User.objects.all())
 
     class Meta:
-        fields = '__all__'
+        fields = ('user', 'following')
         model = Follow
-        read_only_fields = ('id', 'user')
+        read_only_fields = ('user',)
 
     def validate_following(self, value):
         request = self.context.get('request')
@@ -51,3 +51,11 @@ class FollowSerializer(serializers.ModelSerializer):
                     "Нельзя подписаться на самого себя")
 
         return value
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        following = data['following']
+        if Follow.objects.filter(user=user, following=following).exists():
+            raise serializers.ValidationError(
+                "Вы уже подписаны на этого пользователя")
+        return data
